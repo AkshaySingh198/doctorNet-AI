@@ -24,9 +24,11 @@
     0% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }
+
     100% {
         transform: scale(1);
     }
@@ -67,11 +69,11 @@
     .hero-section {
         padding: 40px 0;
     }
-    
+
     .hero-section h1 {
         font-size: 2rem;
     }
-    
+
     .feature-icon {
         width: 50px;
         height: 50px;
@@ -100,8 +102,13 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Custom scrollbar */
@@ -124,7 +131,7 @@
 }
 
 /* Form enhancements */
-.form-floating > label {
+.form-floating>label {
     color: var(--light-text);
 }
 
@@ -137,10 +144,11 @@
 .btn {
     font-weight: 600;
     letter-spacing: 0.5px;
+
 }
 
 .btn-lg {
-    padding: 12px 30px;
+    padding: 5px 10px;
     font-size: 1.1rem;
 }
 
@@ -271,8 +279,15 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .slide-in-left {
@@ -280,8 +295,15 @@
 }
 
 @keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-30px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .slide-in-right {
@@ -289,8 +311,15 @@
 }
 
 @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(30px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Video Call Styles */
@@ -362,7 +391,7 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(0, 0, 0, 0.1);
-   
+
 }
 
 .chat-messages {
@@ -383,6 +412,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -425,17 +455,17 @@
         top: 10px !important;
         right: 10px !important;
     }
-    
+
     .video-call-controls .btn {
         width: 50px !important;
         height: 50px !important;
         font-size: 0.9rem;
     }
-    
+
     .chat-panel {
         height: 150px !important;
     }
-    
+
     .chat-messages {
         max-height: 100px;
     }
@@ -446,17 +476,17 @@
         width: 100px !important;
         height: 75px !important;
     }
-    
+
     .video-call-controls .btn {
         width: 45px !important;
         height: 45px !important;
         font-size: 0.8rem;
     }
-    
+
     .video-call-header h4 {
         font-size: 1.1rem;
     }
-    
+
     .video-call-header small {
         font-size: 0.75rem;
     }
@@ -472,6 +502,7 @@
         opacity: 0;
         transform: scale(0.9);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -486,9 +517,11 @@
     0% {
         box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
     }
+
     70% {
         box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
     }
+
     100% {
         box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
     }
@@ -518,13 +551,14 @@
 
 /* Print styles */
 @media print {
+
     .navbar,
     .footer,
     .btn,
     .modal {
         display: none !important;
     }
-    
+
     .card {
         box-shadow: none;
         border: 1px solid #ddd;
@@ -534,23 +568,24 @@
 /* Health ID */
 
 
-.healthId{
+.healthId {
     display: flex;
     justify-content: center;
     gap: 24px;
-    
-   
+
+
 }
+
 .healthId1 {
-   
+
     display: flex;
-   flex-direction: column;
-   justify-content: space-around; 
-   
-   
-   
+    flex-direction: column;
+    justify-content: space-around;
+
+
+
     font-size: 24px;
-    font-weight:bold;
+    font-weight: bold;
     text-decoration: none;
     box-sizing: border-box;
     border: none;
@@ -559,50 +594,55 @@
     transition: all 0.3s ease;
     width: 620px;
     height: 300px;
-    padding:  2rem 1.5rem;
+    padding: 2rem 1.5rem;
     background-color: white;
-    
-    
+
+
     cursor: pointer;
-    
-    
-    
+
+
+
 }
 
-.healthId1 p{
-    font-weight:lighter;
-    margin:24px 0;
-    color:rgba(33,37,41,0.75);
+.healthId1 p {
+    font-weight: lighter;
+    margin: 24px 0;
+    color: rgba(33, 37, 41, 0.75);
     font-size: 18px;
 }
-.healthId h2{
+
+.healthId h2 {
     font-size: 24px;
 
 }
 
-.healthId1 img{
-    width:100px;
-    height:100px;
-}
-.btn{
-    color: white;
-    background-color: #2563eb;
-    width:fit-content;
+.healthId1 img {
+    width: 100px;
+    height: 100px;
 }
 
-.btn:hover{
+.btn {
+    color: white;
+    background-color: #2563eb;
+    width: fit-content;
+}
+
+.btn:hover {
     background: #1e40af;
     color: white;
 
-} 
-.ashoklogo{
+}
+
+.ashoklogo {
     display: flex;
-    justify-content:space-between;
+    justify-content: space-between;
     align-items: center;
 }
-.navbar-nav{
-    gap:10px;
+
+.navbar-nav {
+    gap: 10px;
 }
-.nav-link:hover{
+
+.nav-link:hover {
     color: #2563eb;
 }

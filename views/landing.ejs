@@ -151,7 +151,7 @@
             <div class="col-md-3 mb-4">
                 <div class="card border-0">
                     <div class="card-body">
-                        <h3 class="fw-bold text-primary">1000+</h3>
+                        <h3 class="fw-bold text-primary"><span id="patientCounter">0</span>+</h3>
                         <p class="text-muted mb-0">Happy Patients</p>
                     </div>
                 </div>
@@ -159,7 +159,7 @@
             <div class="col-md-3 mb-4">
                 <div class="card border-0">
                     <div class="card-body">
-                        <h3 class="fw-bold text-primary">50+</h3>
+                        <h3 class="fw-bold text-primary"><span id="doctorCounter">0</span>+</h3>
                         <p class="text-muted mb-0">Expert Doctors</p>
                     </div>
                 </div>
@@ -175,7 +175,7 @@
             <div class="col-md-3 mb-4">
                 <div class="card border-0">
                     <div class="card-body">
-                        <h3 class="fw-bold text-primary">99%</h3>
+                        <h3 class="fw-bold text-primary"><span id="satisfactionCounter">0</span>%</h3>
                         <p class="text-muted mb-0">Satisfaction Rate</p>
                     </div>
                 </div>
@@ -270,6 +270,42 @@ document.addEventListener('DOMContentLoaded', function() {
             cursorElement.style.opacity = cursorElement.style.opacity === '0' ? '1' : '0';
         }, 500);
     }
+
+    // Counter Animation
+    function animateCounter(elementId, target, duration = 2000, step = 1) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        let current = 0;
+        const increment = (target / duration) * 16; // 16ms is roughly one frame at 60fps
+        
+        function update() {
+            current += increment;
+            if (current >= target) {
+                element.textContent = Math.round(target);
+                return;
+            }
+            element.textContent = Math.round(current);
+            requestAnimationFrame(update);
+        }
+
+        // Start animation when element is in viewport
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    requestAnimationFrame(update);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        observer.observe(element);
+    }
+
+    // Initialize counters
+    animateCounter('patientCounter', 1000);
+    animateCounter('doctorCounter', 50);
+    animateCounter('satisfactionCounter', 99);
 });
 </script>
 

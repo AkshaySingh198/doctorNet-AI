@@ -411,4 +411,18 @@ function viewPatient(patientId) {
     // This would typically redirect to a patient details page
     alert('Patient details would be shown here for patient ID: ' + patientId);
 }
+
+// Custom navbar logic for this page
+document.addEventListener('DOMContentLoaded', function() {
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    navLinks.forEach(link => {
+        if (link.textContent.trim() === 'Doctor Login') {
+            link.innerHTML = '<i class="fas fa-sign-out-alt me-1"></i> Logout';
+            link.href = '/doctor/logout';
+            link.classList.add('text-danger');
+        } else if (link.textContent.trim() === 'Patient Login') {
+            link.parentElement.style.display = 'none';
+        }
+    });
+});
 </script>
