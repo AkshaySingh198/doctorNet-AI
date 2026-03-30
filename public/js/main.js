@@ -197,15 +197,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (file) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    var preview = document.getElementById(this.dataset.preview);
-                    if (preview) {
-                        preview.innerHTML = `
-                            <div class="file-preview">
-                                <i class="fas fa-file-${file.type.includes('image') ? 'image' : 'pdf'} me-2"></i>
-                                ${file.name}
-                                <small class="text-muted d-block">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
-                            </div>
-                        `;
+                    if (input.dataset && input.dataset.preview) {
+                        var preview = document.getElementById(input.dataset.preview);
+                        if (preview) {
+                            preview.innerHTML = `
+                                <div class="file-preview">
+                                    <i class="fas fa-file-${file.type.includes('image') ? 'image' : 'pdf'} me-2"></i>
+                                    ${file.name}
+                                    <small class="text-muted d-block">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                                </div>
+                            `;
+                        }
                     }
                 };
                 reader.readAsDataURL(file);

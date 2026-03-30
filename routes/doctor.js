@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
+const jwt = require('jsonwebtoken');
 
 // Doctor registration page
 router.get('/register', (req, res) => {
@@ -39,6 +40,8 @@ router.post('/register', async (req, res) => {
         });
         
         await doctor.save();
+        const token = jwt.sign({ id: doctor._id, role: 'doctor' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
         req.session.doctorId = doctor._id;
         req.flash('success', 'Registration successful!');
         res.redirect('/doctor/dashboard');
@@ -59,6 +62,8 @@ router.post('/login', async (req, res) => {
             return res.redirect('/doctor/login');
         }
         
+        const token = jwt.sign({ id: doctor._id, role: 'doctor' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
         req.session.doctorId = doctor._id;
         req.flash('success', 'Login successful!');
         res.redirect('/doctor/dashboard');
@@ -146,6 +151,7 @@ router.post('/update-schedule', async (req, res) => {
 // Doctor logout
 router.get('/logout', (req, res) => {
     req.session.doctorId = null;
+    res.clearCookie('token');
     req.flash('success', 'Logged out successfully');
     res.redirect('/');
 });

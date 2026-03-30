@@ -71,11 +71,6 @@ const patientSchema = new mongoose.Schema({
     }
 });
 
-// Hash phone number for password (simple implementation)
-patientSchema.pre('save', async function(next) {
-    if (!this.isModified('phoneNumber')) return next();
-    this.phoneNumber = await bcrypt.hash(this.phoneNumber, 12);
-    next();
-});
+
 
 module.exports = mongoose.model('Patient', patientSchema);

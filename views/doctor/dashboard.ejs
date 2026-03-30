@@ -8,11 +8,7 @@
                     <h2 class="fw-bold mb-1">Welcome,  <%= doctor.name %>!</h2>
                     <p class="text-muted mb-0">Manage your patients and appointments</p>
                 </div>
-                <div>
-                    <a href="/doctor/logout" class="btn btn-outline-danger">
-                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                    </a>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -71,7 +67,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="d-grid">
-                                <button class="btn btn-outline-primary btn-lg" onclick="showPrescriptionModal()">
+                                <button class="btn btn-primary btn-lg" onclick="showPrescriptionModal()">
                                     <i class="fas fa-prescription me-2"></i>
                                     Write Prescription
                                 </button>
@@ -79,7 +75,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="d-grid">
-                                <button class="btn btn-outline-success btn-lg" onclick="showPatientModal()">
+                                <button class="btn btn-primary btn-lg" onclick="showPatientModal()">
                                     <i class="fas fa-user-plus me-2"></i>
                                     Add Patient
                                 </button>
@@ -87,7 +83,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="d-grid">
-                                <a href="/doctor/video-call" class="btn btn-outline-info btn-lg">
+                                <a href="/doctor/video-call" class="btn btn-primary btn-lg">
                                     <i class="fas fa-video me-2"></i>
                                     Start Video Call
                                 </a>
@@ -95,7 +91,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="d-grid">
-                                <button class="btn btn-outline-warning btn-lg">
+                                <button class="btn btn-primary btn-lg">
                                     <i class="fas fa-chart-line me-2"></i>
                                     View Analytics
                                 </button>
@@ -300,7 +296,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="saveSchedule()">Save Schedule</button>
             </div>
         </div>
@@ -419,6 +415,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (link.textContent.trim() === 'Doctor Login') {
             link.innerHTML = '<i class="fas fa-sign-out-alt me-1"></i> Logout';
             link.href = '/doctor/logout';
+            link.classList.add('text-danger');
+        } else if (link.textContent.trim() === 'Patient Login') {
+            link.parentElement.style.display = 'none';
+        }
+    });
+});
+// Custom navbar logic for this page
+document.addEventListener('DOMContentLoaded', function() {
+    const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    navLinks.forEach(link => {
+        if (link.textContent.trim() === 'Doctor Login') {
+            link.innerHTML = '<i class="fas fa-sign-out-alt me-1"></i> Logout';
+            link.href = '/patient/logout';
             link.classList.add('text-danger');
         } else if (link.textContent.trim() === 'Patient Login') {
             link.parentElement.style.display = 'none';

@@ -2,11 +2,12 @@
 // Run this script to populate the database with sample data
 
 const mongoose = require('mongoose');
+require('dotenv').config();
 const Patient = require('./models/Patient');
 const Doctor = require('./models/Doctor');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/telemedicine', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/telemedicine', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });

@@ -93,10 +93,22 @@
                         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
                     </div>
 
+                    <!-- Image Preview Container -->
+                    <div id="imagePreviewContainer" class="d-none mb-2 position-relative d-inline-block">
+                        <img id="imagePreview" src="" alt="Prescription preview" style="max-height: 80px; border-radius: 8px; border: 2px solid var(--primary-color);">
+                        <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="top: -8px; right: -8px; padding: 2px 6px; font-size: 10px;" id="removeImageBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
                     <form id="chatForm" class="mt-auto">
+                        <input type="file" id="prescriptionUpload" accept="image/*,application/pdf" class="d-none">
                         <div class="input-group">
-                            <textarea id="userInput" class="form-control border-radius-sm " placeholder="Type your symptoms, upload prescription text, or ask for diet plan..." rows="2" style="resize: none;"></textarea>
-                            <button type="submit" class="btn btn-primary px-4">
+                            <button type="button" class="btn btn-primary" id="attachBtn" title="Upload Prescription" style="border-radius: 12px 0 0 12px;">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <textarea id="userInput" class="form-control" placeholder="Type symptoms, or upload prescription to analyze..." rows="2" style="resize: none; border-radius: 0;"></textarea>
+                            <button type="submit" class="btn btn-primary px-4" style="border-radius: 0 12px 12px 0;">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
@@ -157,6 +169,49 @@
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
         const typingIndicator = document.getElementById('typingIndicator');
+        const attachBtn = document.getElementById('attachBtn');
+        const prescriptionUpload = document.getElementById('prescriptionUpload');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+
+        let currentAttachment = null;
+
+        attachBtn.addEventListener('click', () => {
+            prescriptionUpload.click();
+        });
+
+        prescriptionUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const mimeType = file.type;
+                const base64Content = event.target.result.split(',')[1]; // Remove data URL prefix
+                
+                currentAttachment = {
+                    mimeType: mimeType,
+                    content: base64Content
+                };
+
+                if (mimeType.startsWith('image/')) {
+                    imagePreview.src = event.target.result;
+                    imagePreviewContainer.classList.remove('d-none');
+                } else if (mimeType === 'application/pdf') {
+                    imagePreview.src = 'https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg';
+                    imagePreviewContainer.classList.remove('d-none');
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        removeImageBtn.addEventListener('click', () => {
+            currentAttachment = null;
+            prescriptionUpload.value = '';
+            imagePreviewContainer.classList.add('d-none');
+            imagePreview.src = '';
+        });
 
         // Scroll to bottom
         function scrollToBottom() {
@@ -171,10 +226,26 @@
             // Add user message to UI
             const userMsgDiv = document.createElement('div');
             userMsgDiv.className = 'message user';
-            userMsgDiv.innerHTML = `<strong>You:</strong><p class="mt-1 mb-0">${message.replace(/\n/g, '<br>')}</p>`;
+            let formattedMsg = `<strong>You:</strong><p class="mt-1 mb-0">${message.replace(/\n/g, '<br>')}</p>`;
+            if (currentAttachment) {
+                formattedMsg += `<div class="mt-2" style="text-align: right;"><span class="badge bg-light text-dark"><i class="fas fa-paperclip me-1"></i> Attachment sent</span></div>`;
+            }
+            userMsgDiv.innerHTML = formattedMsg;
             chatBox.appendChild(userMsgDiv);
             
+            // Capture payload
+            const payload = { 
+                message: message,
+                attachment: currentAttachment
+            };
+
+            // Clear inputs
             userInput.value = '';
+            currentAttachment = null;
+            prescriptionUpload.value = '';
+            imagePreviewContainer.classList.add('d-none');
+            imagePreview.src = '';
+
             scrollToBottom();
 
             // Show typing indicator
@@ -186,7 +257,7 @@
                 const response = await fetch('/patient/ai-assistant/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();

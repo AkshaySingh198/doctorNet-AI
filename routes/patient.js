@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
 const { generateHealthcareResponse } = require('../services/ai.service');
+const jwt = require('jsonwebtoken');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -53,6 +54,8 @@ router.post('/register', async (req, res) => {
         });
         
         await patient.save();
+        const token = jwt.sign({ id: patient._id, role: 'patient' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
         req.session.patientId = patient._id;
         req.flash('success', 'Registration successful!');
         res.redirect('/patient/dashboard');
@@ -73,10 +76,13 @@ router.post('/login', async (req, res) => {
             return res.redirect('/patient/login');
         }
         
+        const token = jwt.sign({ id: patient._id, role: 'patient' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
         req.session.patientId = patient._id;
         req.flash('success', 'Login successful!');
         res.redirect('/patient/dashboard');
     } catch (error) {
+        console.error('Login error:', error);
         req.flash('error', 'Login failed. Please try again.');
         res.redirect('/patient/login');
     }
@@ -230,6 +236,7 @@ router.post('/book-appointment', async (req, res) => {
 // Patient logout
 router.get('/logout', (req, res) => {
     req.session.patientId = null;
+    res.clearCookie('token');
     req.flash('success', 'Logged out successfully');
     res.redirect('/');
 });
@@ -257,10 +264,10 @@ router.post('/ai-assistant/chat', async (req, res) => {
     }
 
     try {
-        const { message } = req.body;
+        const { message, attachment } = req.body;
         const patient = await Patient.findById(req.session.patientId);
         
-        const aiResponse = await generateHealthcareResponse(message, patient);
+        const aiResponse = await generateHealthcareResponse(message, patient, attachment);
 
         res.json({ success: true, message: aiResponse });
     } catch (error) {

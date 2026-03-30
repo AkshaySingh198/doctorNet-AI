@@ -4,6 +4,8 @@ const ejsMate = require('ejs-mate');
 const session = require('express-session');
 const flash = require('connect-flash');
 const path = require('path');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 //const expressLayouts = require('express-ejs-layouts');
 
 const methodOverride = require('method-override');
@@ -16,7 +18,7 @@ const { Server } = require('socket.io');
 const io = new Server(server);
 
 // Database connection
-mongoose.connect('mongodb://localhost:27017/telemedicine', {
+mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
@@ -33,10 +35,11 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layout');
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '50mb' }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
 //app.use(expressLayouts);
 
 // Session configuration
@@ -57,6 +60,26 @@ app.use(flash());
 app.use((req, res, next) => {
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
+    next();
+});
+
+// JWT Authentication Middleware
+app.use((req, res, next) => {
+    const token = req.cookies.token;
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (decoded.role === 'patient') {
+                req.session.patientId = decoded.id;
+            } else if (decoded.role === 'doctor') {
+                req.session.doctorId = decoded.id;
+            }
+            req.user = decoded;
+        } catch (err) {
+            console.error('JWT verification failed:', err.message);
+            res.clearCookie('token');
+        }
+    }
     next();
 });
 

@@ -8,8 +8,9 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
  * Generate a response from the AI assistant for the patient
  * @param {string} userMessage - The message/prompt from the user
  * @param {Object} patientProfile - The patient's context (age, gender, aiProfile, etc.)
+ * @param {Object} attachment - Base64 encoded attachment { mimeType, content }, optional
  */
-async function generateHealthcareResponse(userMessage, patientProfile) {
+async function generateHealthcareResponse(userMessage, patientProfile, attachment) {
     try {
         // Build the rich context for the AI
         let systemContext = `
@@ -54,9 +55,24 @@ PATIENT CONTEXT MEMORY:
             systemContext += `\nNo user profile data available.`;
         }
 
-        const prompt = `${systemContext}\n\nUSER MESSAGE:\n${userMessage}`;
+        const textPrompt = `${systemContext}\n\nUSER MESSAGE:\n${userMessage || 'Please analyze this attached document.'}`;
 
-        const result = await model.generateContent(prompt);
+        let promptParts;
+        if (attachment && attachment.content) {
+            promptParts = [
+                { text: textPrompt },
+                {
+                    inlineData: {
+                        data: attachment.content,
+                        mimeType: attachment.mimeType
+                    }
+                }
+            ];
+        } else {
+            promptParts = textPrompt;
+        }
+
+        const result = await model.generateContent(promptParts);
         const response = await result.response;
         let text = response.text();
 
