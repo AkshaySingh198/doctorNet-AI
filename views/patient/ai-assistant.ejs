@@ -1,0 +1,243 @@
+<% layout('layout') -%>
+
+<!-- Markdown Parser CDN -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+    .chat-container {
+        height: 60vh;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+    }
+    .message {
+        margin-bottom: 20px;
+        max-width: 80%;
+    }
+    .message.user {
+        margin-left: auto;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 18px 18px 0 18px;
+        padding: 12px 16px;
+    }
+    .message.ai {
+        margin-right: auto;
+        background-color: white;
+        border: 1px solid #e9ecef;
+        border-radius: 18px 18px 18px 0;
+        padding: 12px 16px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .typing-indicator {
+        display: none;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 20px;
+    }
+    .dot {
+        width: 8px;
+        height: 8px;
+        background-color: #6c757d;
+        border-radius: 50%;
+        animation: typing 1.4s infinite ease-in-out;
+    }
+    .dot:nth-child(1) { animation-delay: 0s; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+
+    /* Markdown Styling */
+    .message.ai ul, .message.ai ol { margin-bottom: 0; padding-left: 20px; }
+    .message.ai p:last-child { margin-bottom: 0; }
+    .message.ai h3, .message.ai h4 { font-size: 1.1rem; margin-top: 10px; font-weight: bold; }
+</style>
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="fas fa-robot text-primary me-2"></i>AI Health Assistant</h2>
+                <p class="text-muted mb-0">Powered by DocNet - Your personal smart healthcare guide.</p>
+            </div>
+            <a href="/patient/home" class="btn btn-outline-secondary" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
+                <i class="fas fa-arrow-left me-2"></i>Back to Services
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Chat Area -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h5 class="fw-bold"><i class="fas fa-comments text-primary me-2"></i>Doc Chat</h5>
+                    <p class="small text-muted mb-0">Ask about symptoms, diets, exercises, or analyze a prescription.</p>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="chat-container mb-3 flex-grow-1" id="chatBox">
+                        <div class="message ai">
+                            <strong><i class="fas fa-robot me-1"></i> Health Assistant:</strong>
+                            <p class="mt-2 mb-0">Hello <%= patient.name %>! I am your AI Health Assistant. How can I help you today? You can ask me for diet plans, symptom checks, or explain your prescriptions.<br><br><em>Note: I am an AI, not a doctor. I provide guidance, not medical diagnosis.</em></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator px-3" id="typingIndicator">
+                        <span class="text-muted small me-2">AI is thinking</span>
+                        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    </div>
+
+                    <form id="chatForm" class="mt-auto">
+                        <div class="input-group">
+                            <textarea id="userInput" class="form-control border-radius-sm " placeholder="Type your symptoms, upload prescription text, or ask for diet plan..." rows="2" style="resize: none;"></textarea>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safe AI Profile Memory Area -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
+                    <h5 class="mb-0"><i class="fas fa-brain me-2"></i>AI Profile Memory</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Updating this helps the AI give you more personalized health & diet recommendations safely.</p>
+                    
+                    <form action="/patient/ai-assistant/update-profile" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Allergies (comma separated)</label>
+                            <input type="text" class="form-control form-control-sm" name="allergies" value="<%= patient.aiProfile && patient.aiProfile.allergies ? patient.aiProfile.allergies.join(', ') : '' %>" placeholder="e.g. Peanuts, Penicillin">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Past Diseases (comma separated)</label>
+                            <input type="text" class="form-control form-control-sm" name="pastDiseases" value="<%= patient.aiProfile && patient.aiProfile.pastDiseases ? patient.aiProfile.pastDiseases.join(', ') : '' %>" placeholder="e.g. Malaria, Asthma">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Dietary Restrictions</label>
+                            <select name="dietaryRestrictions" class="form-select form-select-sm">
+                                <option value="">None</option>
+                                <option value="Vegetarian" <%= patient.aiProfile && patient.aiProfile.dietaryRestrictions === 'Vegetarian' ? 'selected' : '' %>>Vegetarian</option>
+                                <option value="Vegan" <%= patient.aiProfile && patient.aiProfile.dietaryRestrictions === 'Vegan' ? 'selected' : '' %>>Vegan</option>
+                                <option value="Gluten-Free" <%= patient.aiProfile && patient.aiProfile.dietaryRestrictions === 'Gluten-Free' ? 'selected' : '' %>>Gluten-Free</option>
+                                <option value="Keto" <%= patient.aiProfile && patient.aiProfile.dietaryRestrictions === 'Keto' ? 'selected' : '' %>>Keto</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Lifestyle & Habits</label>
+                            <textarea name="lifestylePatterns" class="form-control form-control-sm" rows="2" placeholder="e.g. Smoke occasionally, walk 3km daily"><%= patient.aiProfile ? patient.aiProfile.lifestylePatterns : '' %></textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="consentCheck" required <%= patient.aiProfile && patient.aiProfile.consentGiven ? 'checked' : '' %>>
+                            <label class="form-check-label small text-muted" for="consentCheck">
+                                I consent to storing this health data for personalized AI responses.
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">Update Profile Memory</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const chatForm = document.getElementById('chatForm');
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Scroll to bottom
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Add user message to UI
+            const userMsgDiv = document.createElement('div');
+            userMsgDiv.className = 'message user';
+            userMsgDiv.innerHTML = `<strong>You:</strong><p class="mt-1 mb-0">${message.replace(/\n/g, '<br>')}</p>`;
+            chatBox.appendChild(userMsgDiv);
+            
+            userInput.value = '';
+            scrollToBottom();
+
+            // Show typing indicator
+            typingIndicator.style.display = 'flex';
+            scrollToBottom();
+
+            try {
+                // Send to backend
+                const response = await fetch('/patient/ai-assistant/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                
+                // Hide typing
+                typingIndicator.style.display = 'none';
+
+                if (data.success) {
+                    const aiMsgDiv = document.createElement('div');
+                    aiMsgDiv.className = 'message ai';
+                    
+                    // Parse markdown to HTML
+                    const parsedHtml = marked.parse(data.message);
+                    
+                    aiMsgDiv.innerHTML = `<strong><i class="fas fa-robot me-1"></i> Health Assistant:</strong><div class="mt-2">${parsedHtml}</div>`;
+                    chatBox.appendChild(aiMsgDiv);
+                } else {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'message ai text-danger';
+                    errorDiv.innerHTML = `<strong>Error:</strong><p class="mt-1 mb-0">Failed to connect to AI. Please try again.</p>`;
+                    chatBox.appendChild(errorDiv);
+                }
+            } catch (err) {
+                typingIndicator.style.display = 'none';
+                console.error(err);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'message ai text-danger';
+                errorDiv.innerHTML = `<strong>Error:</strong><p class="mt-1 mb-0">Network error occurred.</p>`;
+                chatBox.appendChild(errorDiv);
+            }
+            scrollToBottom();
+        });
+
+        // Allow Enter key to submit (Shift+Enter for new line)
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Custom navbar logic for this page
+        const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+        navLinks.forEach(link => {
+            if (link.textContent.trim() === 'Doctor Login') {
+                link.innerHTML = '<i class="fas fa-sign-out-alt me-1"></i> Logout';
+                link.href = '/patient/logout';
+                link.classList.add('text-danger');
+            } else if (link.textContent.trim() === 'Patient Login') {
+                link.parentElement.style.display = 'none';
+            }
+        });
+    });
+</script>

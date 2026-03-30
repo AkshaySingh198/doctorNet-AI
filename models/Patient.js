@@ -57,6 +57,14 @@ const patientSchema = new mongoose.Schema({
         },
         notes: String
     }],
+    aiProfile: {
+        pastDiseases: [{ type: String }],
+        previousSymptoms: [{ type: String }],
+        allergies: [{ type: String }],
+        dietaryRestrictions: { type: String, default: '' },
+        lifestylePatterns: { type: String, default: '' },
+        consentGiven: { type: Boolean, default: false }
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -5,6 +5,7 @@ const Doctor = require('../models/Doctor');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
+const { generateHealthcareResponse } = require('../services/ai.service');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -231,6 +232,69 @@ router.get('/logout', (req, res) => {
     req.session.patientId = null;
     req.flash('success', 'Logged out successfully');
     res.redirect('/');
+});
+
+// AI Assistant page
+router.get('/ai-assistant', async (req, res) => {
+    if (!req.session.patientId) {
+        req.flash('error', 'Please login first');
+        return res.redirect('/patient/login');
+    }
+    
+    try {
+        const patient = await Patient.findById(req.session.patientId);
+        res.render('patient/ai-assistant', { patient });
+    } catch (error) {
+        req.flash('error', 'Error loading AI assistant');
+        res.redirect('/patient/home');
+    }
+});
+
+// Chat endpoint for AI Assistant
+router.post('/ai-assistant/chat', async (req, res) => {
+    if (!req.session.patientId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+        const { message } = req.body;
+        const patient = await Patient.findById(req.session.patientId);
+        
+        const aiResponse = await generateHealthcareResponse(message, patient);
+
+        res.json({ success: true, message: aiResponse });
+    } catch (error) {
+        console.error("Chat error:", error);
+        res.status(500).json({ error: 'Failed to process AI chat' });
+    }
+});
+
+// Update AI Profile Memory
+router.post('/ai-assistant/update-profile', async (req, res) => {
+    if (!req.session.patientId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+        const { allergies, pastDiseases, dietaryRestrictions, lifestylePatterns } = req.body;
+        
+        const updateData = {};
+        if (allergies !== undefined) updateData['aiProfile.allergies'] = allergies.split(',').map(i => i.trim()).filter(i => i);
+        if (pastDiseases !== undefined) updateData['aiProfile.pastDiseases'] = pastDiseases.split(',').map(i => i.trim()).filter(i => i);
+        if (dietaryRestrictions !== undefined) updateData['aiProfile.dietaryRestrictions'] = dietaryRestrictions;
+        if (lifestylePatterns !== undefined) updateData['aiProfile.lifestylePatterns'] = lifestylePatterns;
+        
+        updateData['aiProfile.consentGiven'] = true;
+
+        await Patient.findByIdAndUpdate(req.session.patientId, { $set: updateData });
+        
+        req.flash('success', 'Health Profile updated successfully. Setting applied to patient memory.');
+        res.redirect('/patient/ai-assistant');
+    } catch (error) {
+        console.error("Profile update error:", error);
+        req.flash('error', 'Failed to update health profile memory');
+        res.redirect('/patient/ai-assistant');
+    }
 });
 
 module.exports = router;
